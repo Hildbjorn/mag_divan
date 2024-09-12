@@ -1,0 +1,54 @@
+{% extends 'layout/base.html' %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block title %}
+  Проект "{{ project_name }}" создан!
+{% endblock %}
+
+<!-- META TAGS -->
+{% block meta_tags %}
+  <!-- Основные -->
+  <meta name="description" content="Новый проект Django. Удачной разработки" />
+  <meta name="keywords" content="новый, проект, Django" />
+  <meta name="robots" content="index,follow" />
+  <link rel="canonical" href="https://stratman.pro/" />
+
+  <!-- Для Фейсбука, ВКонтакте, Одноклассников и Гуглплюса -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Новый проект Django" />
+  <meta property="og:title" content="Новый проект Django" />
+  <meta property="og:description" content="Новый проект Django. Удачной разработки" />
+  <meta property="og:url" content="https://stratman.pro/" />
+  <meta property="og:locale" content="ru_RU" />
+
+  <!-- Для Твиттера и Вконтакта -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Новый проект Django" />
+  <meta name="twitter:description" content="Новый проект Django. Удачной разработки" />
+  <meta name="twitter:image:src" content="{% static 'img/elements/logo.png' %}" />
+  <meta name="twitter:url" content="https://stratman.pro/" />
+  <meta name="twitter:domain" content="Новый проект Django" />
+  <meta name="twitter:site" content="Новый проект Django" />
+  <meta name="twitter:creator" content="@stratman.pro" />
+
+  <!-- Для Гуглплюса -->
+  <meta itemprop="name" content="Новый проект Django" />
+  <meta itemprop="description" content="Новый проект Django. Удачной разработки" />
+  <meta itemprop="image" content="{% static 'img/elements/logo.png' %}" />
+{% endblock %}
+
+{% block content %}
+  <div class="container">
+    <div class="hero">
+      <img src="{% static 'img/elements/logo.webp' %}" alt="DSG" />
+      <h2>Django Starter Generator</h2>
+      <h1 class="my-5">Поздравляю! <br /><br />Проект "<span class="head_span">{{ project_name }}</span>" успешно создан.</h1>
+      <p class="mt-3">Django Starter Generator (DSG)&nbsp;&mdash; это инструмент, предназначенный для упрощения и&nbsp;ускорения процесса создания новых проектов на&nbsp;базе Django в&nbsp;операционной системе Windows. DSG позволяет пользователям быстро настраивать проекты, автоматизирует процесс установки необходимых компонентов и&nbsp;библиотек, а&nbsp;также предоставляет функционал авторизации через email, уведомления в&nbsp;Telegram и&nbsp;возможность редактирования профилей пользователей.</p>
+      <p class="mt-3">
+        Подробности <a href="https://github.com/Hildbjorn/django_starter_generator" target="_blank" rel="noopener">на GitHub</a>
+      </p>
+      <a class="logo mt-5" href="https://www.djangoproject.com/" target="_blank" rel="noopener">Django</a>
+    </div>
+  </div>
+{% endblock %}

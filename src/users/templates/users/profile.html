@@ -1,0 +1,123 @@
+{% extends 'layout/base.html' %}
+{% load static %}
+{% load users_tags %}
+
+{% block title %}
+    {% if user.first_name and user.last_name %}
+        {{ user.first_name }} {{ user.last_name }}
+    {% else %}
+        {{ user.get_username }}
+    {% endif %} - Профиль пользователя
+{% endblock %}
+
+<!-- META TAGS -->
+{% block meta_tags %}
+  <!-- Основные -->
+  <meta name="description" content="Новый проект Django. Удачной разработки" />
+  <meta name="keywords" content="новый, проект, Django" />
+  <meta name="robots" content="index,follow" />
+  <link rel="canonical" href="https://stratman.pro/" />
+
+  <!-- Для Фейсбука, ВКонтакте, Одноклассников и Гуглплюса -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Новый проект Django" />
+  <meta property="og:title" content="Новый проект Django" />
+  <meta property="og:description" content="Новый проект Django. Удачной разработки" />
+  <meta property="og:url" content="https://stratman.pro/" />
+  <meta property="og:locale" content="ru_RU" />
+
+  <!-- Для Твиттера и Вконтакта -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Новый проект Django" />
+  <meta name="twitter:description" content="Новый проект Django. Удачной разработки" />
+  <meta name="twitter:image:src" content="{% static 'img/elements/logo.png' %}" />
+  <meta name="twitter:url" content="https://stratman.pro/" />
+  <meta name="twitter:domain" content="Новый проект Django" />
+  <meta name="twitter:site" content="Новый проект Django" />
+  <meta name="twitter:creator" content="@stratman.pro" />
+
+  <!-- Для Гуглплюса -->
+  <meta itemprop="name" content="Новый проект Django" />
+  <meta itemprop="description" content="Новый проект Django. Удачной разработки" />
+  <meta itemprop="image" content="{% static 'img/elements/logo.png' %}" />
+{% endblock %}
+
+{% block content %}
+
+    <!-- Контент главной страницы -->
+    <div class="container bg-body-tertiary rounded shadow-sm my-auto p-3 p-lg-4">
+        <div class="container">
+            <h2>Профиль пользователя</h2>
+            <div class="mt-5">
+                <form action="{{ action }}" id="account_form" method="POST" enctype="multipart/form-data" class="form">
+                    {% csrf_token %}
+                    <div class="row">
+                      <div class="col-12 col-md-4 col-lg-3 col-xl-2">
+                        <h6 class="fw-bolder">&nbsp;</h6>
+                        <div id="avatar_preview" class="avatar">
+                          <label for="avatar_field" class="form-label">
+                            {% if user.avatar %}
+                              <img class="img-fluid" src="{{ user.avatar.url }}" alt="{{ user }}" />
+                            {% else %}
+                              <img class="img-fluid" src="{% static 'img/elements/no_photo.webp' %}" alt="{{ user }}" />
+                            {% endif %}
+                          </label>
+                        </div>
+                        {{ form.avatar }}
+                      </div>
+                      <div class="col-12 col-md-8 col-lg-4 col-xl-5 mt-3 mt-md-0">
+                        <h6 class="fw-bolder mb-2">Личные данные</h6>
+                        <div class="mt-2 mb-2">
+                          <div class="form-floating mb-1">
+                            {{ form.last_name }}
+                            <label for="last_name">{{ form.last_name.label }}</label>
+                          </div>
+                          <div class="form-floating mb-1">
+                            {{ form.first_name }}
+                            <label for="first_name">{{ form.first_name.label }}</label>
+                          </div>
+                          <div class="form-floating mb-1">
+                            {{ form.middle_name }}
+                            <label for="middle_name">{{ form.middle_name.label }}</label>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="col-12 col-lg-5 col-xl-5 mt-3 mt-md-0">
+                        <h6 class="fw-bolder mt-3 mb-2 mt-lg-0">Контакты:</h6>
+                        <div class="mt-2 mb-2">
+                          <div class="form-floating mb-1">
+                            {{ form.phone }}
+                            <label for="phone">{{ form.phone.label }}</label>
+                          </div>
+                          <div class="form-floating mb-1">
+                            {{ form.email }}
+                            {{ form.email.errors }}
+                            <label for="email">{{ form.email.label }}</label>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="row mt-4 align-items-end">
+                      <div class="col-sm-6">
+                        <div class="mt-2 mb-2">
+                          <div class="form-check form-switch">
+                            {{ form.agreement }}
+                            <label class="form-check-label" for="agreement">Согласие с&nbsp;<a href="{% url 'serve_documents' 'User_Agreement.pdf' %}" target="_blank">пользовательским соглашением</a>, <a href="{% url 'serve_documents' 'Privacy_Policy.pdf' %}" target="_blank">политикой конфиденциальности</a> и&nbsp;<a href="{% url 'serve_documents' 'Consent_to_Data_processing_and_Advertising.pdf' %}" target="_blank">соглашением&nbsp;на&nbsp;получение рекламы и&nbsp;обработку персональных данных</a></label>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="col-sm-6 mt-3 mt-md-0">
+                        <div class="mt-2 mb-2 text-end">
+                          {% if request.user.is_authenticated and not user.is_superuser %}
+                            <a href="{% url 'profile_delete' %}" class="btn btn_submit btn-danger btn_width me-3"><i class="fa fa-trash"></i></a>
+                          {% endif %}
+                          <button type="submit" class="btn btn_submit btn-primary btn_width">Обновить</button>
+                        </div>
+                      </div>
+                    </div>
+                  </form>
+            </div>
+        </div>
+        <!-- *********** -->
+
+{% endblock %}

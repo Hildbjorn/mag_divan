@@ -68,14 +68,12 @@ def set_correct_avatar_filename(instance, filename):
 def set_furniture_image_filename(instance, filename):
     """Создает путь к изображению мебели, используя тип, подтип, модель и цвет."""
     # Получаем необходимые атрибуты из экземпляра
-    furniture_type = instance.color.model.subtype.type.name  # Тип мебели
-    sub_type = instance.color.model.subtype.name  # Подтип мебели
-    model_name = instance.color.model.name  # Модель мебели
+    furniture_type = instance.model.type.name  # Тип мебели
+    model_name = instance.model.name  # Модель мебели
     color_name = instance.color.name  # Цвет
 
     # Транслитерация названий
     furniture_type = pytils.translit.translify(furniture_type)
-    sub_type = pytils.translit.translify(sub_type)
     model_name = pytils.translit.translify(model_name)
     color_name = pytils.translit.translify(color_name)
 
@@ -86,8 +84,7 @@ def set_furniture_image_filename(instance, filename):
     file_name = '{0}{1}'.format(name, ext).lower()
 
     # Формирование пути
-    path = f'furniture_images/{furniture_type}/{
-        sub_type}/{model_name}/{color_name}/'
+    path = f'furniture_images/{furniture_type}/{model_name}/{color_name}/'
     file_path = os.path.join(path, file_name)
 
     return file_path

@@ -129,7 +129,7 @@ STATICFILES_FINDERS = [
 ]
 
 STATICFILES_DIRS = [
-    BASE_DIR.joinpath('static'),
+    BASE_DIR / "static",  # Убедитесь, что путь указан правильно
 ]
 
 STATIC_ROOT = BASE_DIR.joinpath('staticfiles')

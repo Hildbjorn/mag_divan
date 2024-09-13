@@ -46,3 +46,7 @@ class ProfileAdmin(UserAdmin):
     search_fields = ('last_name', 'first_name',
                      'middle_name', 'email', 'company',)
     ordering = ('last_name', 'first_name', 'middle_name', 'email',)
+
+
+admin.site.site_title = 'Электронный каталог мебели | Админ-панель'
+admin.site.site_header = 'Электронный каталог мебели | Админ-панель'

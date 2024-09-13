@@ -2,10 +2,8 @@ import os
 from django.core.validators import RegexValidator
 from django.db import models
 
-
 from django.db import models
 from django.utils import timezone
-from django.utils.text import slugify
 
 from core.utils import get_slug, resize_and_crop_image, set_furniture_image_filename
 
@@ -16,8 +14,7 @@ class FurnitureType(models.Model):
     """
     name = models.CharField(max_length=100,
                             verbose_name="Тип мебели")
-    description = models.TextField(max_length=255,
-                                   blank=True,
+    description = models.TextField(blank=True,
                                    verbose_name="Описание")
     slug = models.SlugField(unique=True,
                             blank=True,
@@ -33,38 +30,7 @@ class FurnitureType(models.Model):
 
     class Meta:
         verbose_name = 'Тип мебели'
-        verbose_name_plural = '.....Типы мебели'
-        ordering = ['name']
-
-
-class FurnitureSubType(models.Model):
-    """
-    Модель для хранения подтипов типов мебели (например, "угловой диван").
-    """
-    type = models.ForeignKey(FurnitureType,
-                             related_name='subtypes',
-                             on_delete=models.CASCADE,
-                             verbose_name="Тип мебели")
-    name = models.CharField(max_length=100,
-                            verbose_name="Подтип мебели")
-    description = models.TextField(max_length=255,
-                                   blank=True,
-                                   verbose_name="Описание")
-    slug = models.SlugField(unique=True,
-                            blank=True,
-                            verbose_name="Slug")
-
-    def save(self, *args, **kwargs):
-        if not self.slug:
-            self.slug = get_slug(self)
-        super().save(*args, **kwargs)
-
-    def __str__(self):
-        return self.name1
-
-    class Meta:
-        verbose_name = 'Подтип мебели'
-        verbose_name_plural = '....Подтипы мебели'
+        verbose_name_plural = 'Типы мебели'
         ordering = ['name']
 
 
@@ -72,11 +38,13 @@ class FurnitureModel(models.Model):
     """
     Модель для хранения конкретных моделей мебели (например, угловой диван "Елена").
     """
-    subtype = models.ForeignKey(FurnitureSubType, related_name='models',
-                                on_delete=models.CASCADE, verbose_name="Подтип мебели")
+    type = models.ForeignKey(FurnitureType,
+                             related_name='models',
+                             on_delete=models.CASCADE,
+                             verbose_name="Тип мебели")
     name = models.CharField(max_length=100, verbose_name="Модель мебели")
-    description = models.TextField(
-        max_length=255, blank=True, verbose_name="Описание")
+    description = models.TextField(blank=True,
+                                   verbose_name="Описание")
     slug = models.SlugField(unique=True, blank=True, verbose_name="Slug")
 
     def save(self, *args, **kwargs):
@@ -89,7 +57,7 @@ class FurnitureModel(models.Model):
 
     class Meta:
         verbose_name = 'Модель мебели'
-        verbose_name_plural = '...Модели мебели'
+        verbose_name_plural = 'Модели мебели'
         ordering = ['name']
 
 
@@ -97,10 +65,6 @@ class Color(models.Model):
     """
     Модель для хранения цветов моделей.
     """
-    model = models.ForeignKey(FurnitureModel,
-                              related_name='colors',
-                              on_delete=models.CASCADE,
-                              verbose_name="Модель мебели")
     name = models.CharField(max_length=50,
                             verbose_name="Цвет мебели")
     hex_code = models.CharField(max_length=7,
@@ -108,11 +72,7 @@ class Color(models.Model):
                                                            message='Введите цвет в формате HEX (#RRGGBB или #RGB).')],
                                 verbose_name="HEX код цвета"
                                 )
-    images = models.ManyToManyField('Image',
-                                    related_name='colors',
-                                    verbose_name="Фото")
-    description = models.TextField(max_length=255,
-                                   blank=True,
+    description = models.TextField(blank=True,
                                    verbose_name="Описание")
     slug = models.SlugField(unique=True,
                             blank=True,
@@ -128,7 +88,7 @@ class Color(models.Model):
 
     class Meta:
         verbose_name = 'Цвет мебели'
-        verbose_name_plural = '..Цвета мебели'
+        verbose_name_plural = 'Цвета мебели'
         ordering = ['name']
 
 
@@ -136,26 +96,31 @@ class Image(models.Model):
     """
     Модель для хранения изображений.
     """
-    # color = models.ForeignKey(
-    #     Color, on_delete=models.CASCADE, related_name='images', verbose_name="Цвет")
+    model = models.ForeignKey(FurnitureModel,
+                              related_name='images',
+                              on_delete=models.CASCADE,
+                              null=True,
+                              verbose_name="Модель мебели")
+    color = models.ForeignKey(Color,
+                              on_delete=models.CASCADE,
+                              null=True,
+                              related_name='images',
+                              verbose_name="Цвет")
     image = models.ImageField(upload_to=set_furniture_image_filename,
                               verbose_name="Фото"
                               )
-    max_size = (1280, 720)
-    description = models.TextField(max_length=255,
-                                   blank=True,
-                                   verbose_name="Описание")
-    uploaded_at = models.DateTimeField(default=timezone.now,
-                                       verbose_name="Дата загрузки")
+    max_size = (1024, 1024)
+    uploaded_at = models.DateTimeField(auto_now=True,
+                                       verbose_name="Дата и время обновления")
 
     def __str__(self):
-        return self.description or f'Image_{self.id}'
+        return f'{self.model}_{self.color}_{self.id}'
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
-        if self.avatar:
-            resize_and_crop_image(self.avatar.path, self.max_size)
-            self.avatar = self.avatar
+        if self.image:
+            resize_and_crop_image(self.image.path, self.max_size)
+            self.image = self.image
         super().save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
@@ -172,5 +137,5 @@ class Image(models.Model):
 
     class Meta:
         verbose_name = 'Фото мебели'
-        verbose_name_plural = '.Фото мебели'
+        verbose_name_plural = 'Фото мебели'
         ordering = ['-uploaded_at']

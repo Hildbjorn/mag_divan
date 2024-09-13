@@ -1,16 +1,44 @@
+from django import forms
 from django.contrib import admin
-from django.templatetags.static import static
-from django.utils.html import escape, format_html
+from django.utils.html import format_html
+from django.utils.safestring import mark_safe
+# Импортируйте необходимые модели
+from .models import FurnitureType, Image, FurnitureModel, Color
 
-from .models import Color, FurnitureModel, FurnitureType, Image
 
+class ColorCheckboxSelectMultiple(forms.CheckboxSelectMultiple):
+    def render(self, name, value, attrs=None, choices=()):
 
-class ImageInline(admin.TabularInline):
-    model = Image
-    extra = 5  # Количество пустых форм для добавления новых изображений
-    fields = ('image', 'color', 'uploaded_at')
-    # Сделаем поле "Дата загрузки" только для чтения
-    readonly_fields = ('uploaded_at',)
+        print(f"Value passed to render: {value}")
+
+        output = []
+        # Преобразуем value в множество для более быстрой проверки
+        value_set = set(map(str, value)) if value else set()
+
+        for i, (option_value, option_label) in enumerate(self.choices):
+            # Получение hex_code (предполагаем, что это уже реализовано)
+            if isinstance(option_label, str):
+                color_obj = Color.objects.get(name=option_label)
+                hex_code = color_obj.hex_code
+            else:
+                hex_code = option_label.hex_code
+
+            checked = 'checked' if str(option_value) in value_set else ''
+            checkbox_html = f'<input type="checkbox" name="{name}" value="{
+                option_value}" {checked} id="id_{name}_{i}">'
+
+            # Добавляем кружок перед спаном
+            circle_html = f'<span class="check_colors_sample" style="background-color: {
+                hex_code};"></span>'
+            span_html = f'<span>{option_label} ({hex_code})</span>'
+            label_html = f'<label for="id_{name}_{i}">{
+                checkbox_html} {circle_html} {span_html}</label>'
+            output.append(label_html)
+
+        return mark_safe('\n'.join(output))
+
+    def value_from_datadict(self, data, files, name):
+        return super().value_from_datadict(data, files, name)
 
 
 @admin.register(FurnitureType)
@@ -22,10 +50,29 @@ class FurnitureTypeAdmin(admin.ModelAdmin):
 
 @admin.register(FurnitureModel)
 class FurnitureModelAdmin(admin.ModelAdmin):
-    list_display = ('name', 'type', 'slug')
-    search_fields = ('name',)
-    prepopulated_fields = {'slug': ('name',)}  # Автоматическое заполнение slug
-    inlines = [ImageInline]  # Включаем инлайн для изображений
+    list_display = ('name', 'display_colors', 'type', 'description', 'slug',)
+    search_fields = ('name', 'description')
+    prepopulated_fields = {'slug': ('name',)}
+
+    class Meta:
+        model = FurnitureModel
+
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        if db_field.name == 'colors':
+            kwargs['widget'] = ColorCheckboxSelectMultiple()
+            kwargs['queryset'] = Color.objects.all()
+        return super().formfield_for_dbfield(db_field, request, **kwargs)
+
+    def display_colors(self, obj):
+        colors_html = "".join(
+            f"""<div class="display_colors_item">
+            <div class="display_colors_sample" style="background-color: {color.hex_code};"></div>
+            <span>{color.name} ({color.hex_code})</span>
+        </div>"""
+            for color in obj.colors.all()
+        )
+        return mark_safe(f'<div>{colors_html}</div>')
+    display_colors.short_description = 'Цвета'
 
 
 @admin.register(Color)
@@ -41,26 +88,23 @@ class ColorAdmin(admin.ModelAdmin):
             '<div style="width: 30px; height: 30px; background-color: {}; border: 1px solid #000; border-radius: 50%;"></div>',
             obj.hex_code
         )
-    hex_code_display.short_description = 'Цвет'  # Заголовок столбца
+    hex_code_display.short_description = 'Цвет'
 
 
 @admin.register(Image)
 class ImageAdmin(admin.ModelAdmin):
-    list_display = ('image_tag', 'color_display', 'uploaded_at')
-    list_display_links = ('image_tag', )
-    list_filter = ('model', 'color')
+    list_display = ('image_tag', 'furniture_model',
+                    'color_display', 'uploaded_at')
+    list_display_links = ('image_tag', 'furniture_model',)
     fieldsets = (
         (None, {
-            'fields': (('model', 'color'),),
-        }),
-        (None, {
-            'fields': ('image_thumbnail', 'image',),
+            'fields': ('furniture_model', 'color', 'image'),
         }),
         (None, {
             'fields': ('uploaded_at',),
         }),
     )
-    readonly_fields = ('image_thumbnail', 'uploaded_at')
+    readonly_fields = ('uploaded_at',)
 
     def image_tag(self, obj):
         return format_html('<img src="{}" width="70" height="70" style="object-fit: cover; border-radius: 5px;" />', obj.image.url)
@@ -76,13 +120,5 @@ class ImageAdmin(admin.ModelAdmin):
             obj.color.hex_code
         )
 
-    def image_thumbnail(self, obj):
-        if obj.image:
-            return format_html('<img id="image_thumbnail" src="{}" width="250" height="250" style="object-fit: cover; border-radius: 5px;" />',
-                               obj.image.url)
-        return format_html('<img id="image_thumbnail" src="{}" width="250" height="250" style="object-fit: cover; border-radius: 5px;" />',
-                           static('img/elements/no_foto.webp'))
-
     image_tag.short_description = 'Фото'
     color_display.short_description = 'Цвет'
-    image_thumbnail.short_description = 'Предпросмотр фото'

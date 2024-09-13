@@ -8,10 +8,16 @@
 $font-stack: Roboto, sans-serif;
 $image_tag_size: 80px;
 $text_field_width: 250px;
+$phone_field_width: 110px;
+$color_label_width: 150px;
 $color_preview_size: 20px;
 
 body {
     font: 100% $font-stack;
+
+    a {
+        align-content: center;
+    }
 }
 
 
@@ -19,11 +25,85 @@ body {
     * {
         vertical-align: middle;
     }
+
+    .field-display_colors,
+    .field-slug {
+        text-wrap: nowrap;
+
+        .display_colors_item {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            margin: 5px 0;
+
+            .display_colors_sample {
+                width: $color_preview_size;
+                height: $color_preview_size;
+                border-radius: 50%;
+                margin-right: 5px;
+            }
+        }
+    }
+}
+
+.form-row {
+    * {
+        vertical-align: middle;
+    }
+
+}
+
+
+.field-colors {
+    width: 900px;
+
+
+
+    label {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        min-width: 200px;
+        margin: 5px 0 0 0;
+
+        .check_colors_sample {
+            display: block;
+            min-width: $color_preview_size;
+            min-height: $color_preview_size;
+            width: $color_preview_size;
+            height: $color_preview_size;
+            border: 1px solid gray;
+            border-radius: 50%;
+            margin: 0 5px;
+        }
+
+        span {
+            display: inline-block;
+            align-content: center;
+            min-width: $color_label_width;
+            width: $color_label_width;
+            height: 35px;
+            color: #000000 !important;
+            vertical-align: middle;
+            margin: 0;
+        }
+    }
+}
+
+#id_colors {
+    text-wrap: nowrap;
+}
+
+.field-phone {
+    width: $phone_field_width;
+    text-wrap: nowrap;
 }
 
 .field-image_tag {
     width: $image_tag_size;
 }
+
+
 
 .field-color_display {
     width: $text_field_width;

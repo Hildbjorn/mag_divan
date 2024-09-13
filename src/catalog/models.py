@@ -42,10 +42,16 @@ class FurnitureModel(models.Model):
                              related_name='models',
                              on_delete=models.CASCADE,
                              verbose_name="Тип мебели")
-    name = models.CharField(max_length=100, verbose_name="Модель мебели")
+    name = models.CharField(max_length=100,
+                            verbose_name="Модель мебели")
+    colors = models.ManyToManyField('Color',
+                                    related_name='furniture_models',
+                                    verbose_name="цвета мебели")
     description = models.TextField(blank=True,
                                    verbose_name="Описание")
-    slug = models.SlugField(unique=True, blank=True, verbose_name="Slug")
+    slug = models.SlugField(unique=True,
+                            blank=True,
+                            verbose_name="Slug")
 
     def save(self, *args, **kwargs):
         if not self.slug:
@@ -67,6 +73,7 @@ class Color(models.Model):
     """
     name = models.CharField(max_length=50,
                             verbose_name="Цвет мебели")
+
     hex_code = models.CharField(max_length=7,
                                 validators=[RegexValidator(regex=r'^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$',
                                                            message='Введите цвет в формате HEX (#RRGGBB или #RGB).')],
@@ -89,23 +96,30 @@ class Color(models.Model):
     class Meta:
         verbose_name = 'Цвет мебели'
         verbose_name_plural = 'Цвета мебели'
-        ordering = ['name']
+        ordering = ['hex_code']
 
 
-class Image(models.Model):
+class FurnitureBase(models.Model):
+    """
+    Абстрактная модель, которая объединяет FurnitureModel и Color
+    """
+    furniture_model = models.ForeignKey(FurnitureModel,
+                                        null=True,
+                                        on_delete=models.CASCADE,
+                                        verbose_name="Модель мебели")
+    color = models.ForeignKey(Color,
+                              null=True,
+                              on_delete=models.CASCADE,
+                              verbose_name="Цвет")
+
+    class Meta:
+        abstract = True
+
+
+class Image(FurnitureBase):
     """
     Модель для хранения изображений.
     """
-    model = models.ForeignKey(FurnitureModel,
-                              related_name='images',
-                              on_delete=models.CASCADE,
-                              null=True,
-                              verbose_name="Модель мебели")
-    color = models.ForeignKey(Color,
-                              on_delete=models.CASCADE,
-                              null=True,
-                              related_name='images',
-                              verbose_name="Цвет")
     image = models.ImageField(upload_to=set_furniture_image_filename,
                               verbose_name="Фото"
                               )
@@ -114,7 +128,7 @@ class Image(models.Model):
                                        verbose_name="Дата и время обновления")
 
     def __str__(self):
-        return f'{self.model}_{self.color}_{self.id}'
+        return f'{self.furniture_model}_{self.color}_{self.id}'
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)

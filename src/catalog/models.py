@@ -152,4 +152,4 @@ class Image(FurnitureBase):
     class Meta:
         verbose_name = 'Фото мебели'
         verbose_name_plural = 'Фото мебели'
-        ordering = ['-uploaded_at']
+        ordering = ['furniture_model', 'color', 'uploaded_at']

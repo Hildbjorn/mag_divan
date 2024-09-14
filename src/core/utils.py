@@ -68,8 +68,8 @@ def set_correct_avatar_filename(instance, filename):
 def set_furniture_image_filename(instance, filename):
     """Создает путь к изображению мебели, используя тип, подтип, модель и цвет."""
     # Получаем необходимые атрибуты из экземпляра
-    furniture_type = instance.model.type.name  # Тип мебели
-    model_name = instance.model.name  # Модель мебели
+    furniture_type = instance.furniture_model.type.name  # Тип мебели
+    model_name = instance.furniture_model.name  # Модель мебели
     color_name = instance.color.name  # Цвет
 
     # Транслитерация названий

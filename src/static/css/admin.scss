@@ -12,12 +12,24 @@ $phone_field_width: 110px;
 $color_label_width: 150px;
 $color_preview_size: 20px;
 
+// Подключение Bootstrap SCSS
+@import "../bootstrap/scss/bootstrap";
+
 body {
     font: 100% $font-stack;
 
     a {
         align-content: center;
     }
+
+    table {
+        caption-side: unset;
+    }
+}
+
+.deletelink,
+.cancel-link {
+    height: unset !important;
 }
 
 

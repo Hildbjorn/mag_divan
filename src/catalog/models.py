@@ -10,7 +10,7 @@ from core.utils import get_slug, resize_and_crop_image, set_furniture_image_file
 
 class FurnitureType(models.Model):
     """
-    Модель для хранения типов мебели (например, "диваны").
+    Модель для хранения типов мебели.
     """
     name = models.CharField(max_length=100,
                             verbose_name="Тип мебели")
@@ -36,7 +36,7 @@ class FurnitureType(models.Model):
 
 class FurnitureModel(models.Model):
     """
-    Модель для хранения конкретных моделей мебели (например, угловой диван "Елена").
+    Модель для хранения конкретных моделей мебели/
     """
     type = models.ForeignKey(FurnitureType,
                              related_name='models',

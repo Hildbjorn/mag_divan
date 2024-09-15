@@ -9260,27 +9260,37 @@ body {
 .cancel-link {
   height: unset !important; }
 
+.display_colors_item {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin: 5px 0; }
+  .display_colors_item .display_colors_sample {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    margin-right: 5px; }
+
 #result_list * {
   vertical-align: middle; }
 
 #result_list .field-display_colors,
 #result_list .field-slug {
   text-wrap: nowrap; }
-  #result_list .field-display_colors .display_colors_item,
-  #result_list .field-slug .display_colors_item {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    margin: 5px 0; }
-    #result_list .field-display_colors .display_colors_item .display_colors_sample,
-    #result_list .field-slug .display_colors_item .display_colors_sample {
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      margin-right: 5px; }
 
 .form-row * {
   vertical-align: middle; }
+
+.field-color {
+  display: none;
+  transition: max-height 0.5s ease-out, opacity 0.5s ease-out;
+  overflow: hidden;
+  opacity: 0; }
+
+.field-color.active {
+  display: block;
+  max-height: 200px;
+  opacity: 1; }
 
 .field-colors {
   width: 900px; }

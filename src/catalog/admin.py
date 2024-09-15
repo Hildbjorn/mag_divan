@@ -6,28 +6,63 @@ from django.utils.safestring import mark_safe
 from .models import FurnitureType, Image, FurnitureModel, Color
 
 
+# class ColorCheckboxSelectMultiple(forms.CheckboxSelectMultiple):
+#     def render(self, name, value, attrs=None, choices=()):
+
+#         print(f"Value passed to render: {value}")
+
+#         output = []
+#         # Преобразуем value в множество для более быстрой проверки
+#         value_set = set(map(str, value)) if value else set()
+
+#         for i, (option_value, option_label) in enumerate(self.choices):
+#             # Получение hex_code (предполагаем, что это уже реализовано)
+#             if isinstance(option_label, str):
+#                 color_obj = Color.objects.get(name=option_label)
+#                 hex_code = color_obj.hex_code
+#             else:
+#                 hex_code = option_label.hex_code
+
+#             checked = 'checked' if str(option_value) in value_set else ''
+#             checkbox_html = f'<input type="checkbox" name="{name}" value="{
+#                 option_value}" {checked} id="id_{name}_{i}">'
+
+#             # Добавляем кружок перед спаном
+#             circle_html = f'<span class="check_colors_sample" style="background-color: {
+#                 hex_code};"></span>'
+#             span_html = f'<span>{option_label} ({hex_code})</span>'
+#             label_html = f'<label for="id_{name}_{i}">{
+#                 checkbox_html} {circle_html} {span_html}</label>'
+#             output.append(label_html)
+
+#         return mark_safe('\n'.join(output))
+
+#     def value_from_datadict(self, data, files, name):
+#         return super().value_from_datadict(data, files, name)
+
+from django import forms
+from django.utils.safestring import mark_safe
+from .models import Color  # Убедитесь, что импортирована ваша модель Color
+
+
 class ColorCheckboxSelectMultiple(forms.CheckboxSelectMultiple):
     def render(self, name, value, attrs=None, choices=()):
-
         print(f"Value passed to render: {value}")
 
         output = []
-        # Преобразуем value в множество для более быстрой проверки
         value_set = set(map(str, value)) if value else set()
 
+        # Загружаем все цвета заранее
+        color_dict = {
+            color.name: color.hex_code for color in Color.objects.all()}
+
         for i, (option_value, option_label) in enumerate(self.choices):
-            # Получение hex_code (предполагаем, что это уже реализовано)
-            if isinstance(option_label, str):
-                color_obj = Color.objects.get(name=option_label)
-                hex_code = color_obj.hex_code
-            else:
-                hex_code = option_label.hex_code
+            # Установите цвет по умолчанию
+            hex_code = color_dict.get(option_label, '#FFFFFF')
 
             checked = 'checked' if str(option_value) in value_set else ''
             checkbox_html = f'<input type="checkbox" name="{name}" value="{
                 option_value}" {checked} id="id_{name}_{i}">'
-
-            # Добавляем кружок перед спаном
             circle_html = f'<span class="check_colors_sample" style="background-color: {
                 hex_code};"></span>'
             span_html = f'<span>{option_label} ({hex_code})</span>'
@@ -59,7 +94,7 @@ class FurnitureModelAdmin(admin.ModelAdmin):
 
     def formfield_for_dbfield(self, db_field, request, **kwargs):
         if db_field.name == 'colors':
-            kwargs['widget'] = ColorCheckboxSelectMultiple()
+            kwargs['widget'] = forms.CheckboxSelectMultiple()
             kwargs['queryset'] = Color.objects.all()
         return super().formfield_for_dbfield(db_field, request, **kwargs)
 
@@ -119,6 +154,15 @@ class ImageAdmin(admin.ModelAdmin):
             obj.color.name,
             obj.color.hex_code
         )
+
+    def formfield_for_manytomany(self, db_field, request, **kwargs):
+        if db_field.name == "colors":
+            if request.GET.get('furniture_model'):
+                kwargs["queryset"] = Color.objects.filter(
+                    furniture_models=request.GET.get('furniture_model'))
+            else:
+                kwargs["queryset"] = Color.objects.none()
+        return super().formfield_for_manytomany(db_field, request, **kwargs)
 
     image_tag.short_description = 'Фото'
     color_display.short_description = 'Цвет'
